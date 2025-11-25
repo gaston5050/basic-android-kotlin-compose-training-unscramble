@@ -78,6 +78,8 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+
+        /*
         var nombre by remember {mutableStateOf("")}
         Text(
             text = nombre
@@ -88,7 +90,7 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
             label = { Text("Nombre") }
         )
 
-
+*/
         Text(
             text = stringResource(R.string.app_name),
             style = typography.titleLarge,
@@ -96,9 +98,11 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
         GameLayout(
             onUserGuessChanged = {gameViewModel.updateUserGuess(it)},
             userGuess = gameViewModel.userGuess,
+            palabraSinMezclar = gameUiState.palabraSeleccionada,
             isGuessWrong = gameUiState.isGuessedWordWrong,
             onKeyboardDone = {gameViewModel.checkUserGuess()},
             currentScrambledWord = gameUiState.currentScrambledWord,
+            wordCount = gameUiState.currentWordCount,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -123,7 +127,7 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
             }
 
             OutlinedButton(
-                onClick = { },
+                onClick = { gameViewModel.skipWord() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -133,9 +137,16 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
             }
         }
 
-        GameStatus(score = 0, modifier = Modifier.padding(20.dp))
+        GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
+    }
+    if(gameUiState.isGameOver){
+        FinalScoreDialog(
+            score = gameUiState.score,
+            onPlayAgain = { gameViewModel.resetGame() }
+        )
     }
 }
+
 
 @Composable
 fun GameStatus(score: Int, modifier: Modifier = Modifier) {
@@ -153,9 +164,11 @@ fun GameStatus(score: Int, modifier: Modifier = Modifier) {
 @Composable
 fun GameLayout( currentScrambledWord: String,
                 userGuess: String,
+                palabraSinMezclar: String = "no llega nada",
                 isGuessWrong: Boolean,
                 onUserGuessChanged: (String) -> Unit,
                 onKeyboardDone: () -> Unit,
+                wordCount: Int,
                 modifier: Modifier = Modifier) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
 
@@ -169,15 +182,20 @@ fun GameLayout( currentScrambledWord: String,
             modifier = Modifier.padding(mediumPadding)
         ) {
 
+
             Text(
                 modifier = Modifier
                     .clip(shapes.medium)
                     .background(colorScheme.surfaceTint)
                     .padding(horizontal = 10.dp, vertical = 4.dp)
                     .align(alignment = Alignment.End),
-                text = stringResource(R.string.word_count, 0),
+                text = stringResource(R.string.word_count, wordCount),
                 style = typography.titleMedium,
                 color = colorScheme.onPrimary
+            )
+            Text( text= palabraSinMezclar,
+                fontSize = 45.sp,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Text( text= currentScrambledWord,
                 fontSize = 45.sp,
